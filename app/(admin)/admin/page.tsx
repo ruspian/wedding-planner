@@ -2,38 +2,59 @@ import AdminDashboardClient from "@/components/layout/AdminDashboardClient";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminDashboardPage() {
-  // Setup tanggal hari ini buat filter data
+  //tanggal hari ini
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Jalankan query paralel pakai transaction bawaan schema lo
-  const [totalUsers, activeWeddingsCount] = await prisma.$transaction([
-    // 1. Hitung total semua user di database
-    prisma.user.count(),
+  // tanggal 1 bulan ini
+  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    // 2. Hitung project pernikahan yang "Aktif"
-    // (Asumsinya: Tanggal pernikahannya masih nanti / lebih besar dari hari ini)
-    prisma.wedding.count({
-      where: {
-        weddingDate: {
-          gte: today,
+  const [totalUsers, newUsersToday, activeWeddingsCount, monthlyTransactions] =
+    await prisma.$transaction([
+      prisma.user.count(),
+
+      prisma.user.count({
+        where: {
+          createdAt: {
+            gte: today,
+          },
         },
-      },
-    }),
-  ]);
+      }),
 
-  // Siapkan data buat dilempar ke komponen Client
+      // tanggal wedding masih lama
+      prisma.wedding.count({
+        where: {
+          weddingDate: {
+            gte: today,
+          },
+        },
+      }),
+
+      // 4. Ambil semua transaksi sukses bulan ini buat dihitung
+      prisma.transaction.findMany({
+        where: {
+          status: "SUCCESS",
+          createdAt: {
+            gte: firstDayOfMonth,
+          },
+        },
+        select: {
+          amount: true,
+        },
+      }),
+    ]);
+
+  // Hitung total pendapatan (Revenue) bulan ini pakai data dari transaksi DB
+  const monthlyRevenue = monthlyTransactions.reduce(
+    (total, trx) => total + Number(trx.amount), // Konversi Decimal Prisma ke Number JS
+    0,
+  );
+
   const serverData = {
     totalUsers: totalUsers,
-    activeWeddings: activeWeddingsCount, // Data asli dari tabel Wedding
-
-    // --- Data Placeholder (Karena belum ada di Schema) ---
-    // Nanti bisa diganti kalau lo udah nambahin tabel Subscription/Pembayaran
-    monthlyRevenue: 0,
-
-    // Nanti bisa diganti kalau lo udah nambahin field `createdAt` di tabel User
-    newUsersToday: 0,
-
+    activeWeddings: activeWeddingsCount,
+    monthlyRevenue: monthlyRevenue,
+    newUsersToday: newUsersToday,
     systemStatus: "Healthy",
   };
 
