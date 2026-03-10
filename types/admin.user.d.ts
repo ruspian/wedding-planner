@@ -5,6 +5,7 @@ export interface UserData {
   weddingDate: string;
   status: string;
   plan: string;
+  isSuspended?: boolean;
 }
 
 export interface AdminUsersClientProps {
@@ -12,4 +13,18 @@ export interface AdminUsersClientProps {
   totalPages: number;
   currentPage: number;
   totalUsers: number;
+}
+
+export interface DetailUserProps {
+  selectedUser: UserData | null;
+  setSelectedUser: (user: UserData | null) => void;
+  modalVariants: Variants;
+}
+
+export interface SuspendUserProps {
+  userToSuspend: UserData | null;
+  setUserToSuspend: (user: UserData | null) => void;
+  handleConfirmSuspend: () => void;
+  isSuspending: boolean;
+  modalVariants: Variants;
 }

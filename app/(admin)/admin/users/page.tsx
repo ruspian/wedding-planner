@@ -69,6 +69,7 @@ export default async function AdminUsersPage({
       : "Belum Diatur",
     status: user.transactions[0]?.status || "PENDING",
     plan: "Premium",
+    isSuspended: user.isSuspended,
   }));
 
   return (

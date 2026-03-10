@@ -50,6 +50,8 @@ model User {
   
   accounts      Account[]
   sessions      Session[]
+
+  isSuspended   Boolean   @default(false)
   
   // Relasi ke sistem Wedding Planner
   weddings      Wedding[] 
