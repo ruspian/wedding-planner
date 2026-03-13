@@ -3,7 +3,6 @@
 import { motion, Variants } from "framer-motion";
 import {
   Search,
-  Filter,
   MoreVertical,
   ShieldBan,
   Eye,
@@ -17,6 +16,7 @@ import DetailUser from "./DetailUser";
 import SuspendUser from "./SuspendUser";
 import { toggleSuspendUser } from "@/actions/admin.action";
 import { toast } from "sonner";
+import { useDebounce } from "use-debounce";
 
 export default function AdminUsersClient({
   usersData,
@@ -28,13 +28,29 @@ export default function AdminUsersClient({
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [userToSuspend, setUserToSuspend] = useState<UserData | null>(null);
   const [isSuspending, setIsSuspending] = useState(false);
+  const [search, setSearch] = useState("");
 
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // ambil nilai pencarian
-  const currentSearch = searchParams.get("search") || "";
+  const [debouncedSearch] = useDebounce(search, 500);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    const currentSearch = searchParams.get("search") || "";
+
+    if (debouncedSearch !== currentSearch) {
+      if (debouncedSearch) {
+        params.set("search", debouncedSearch);
+      } else {
+        params.delete("search");
+      }
+
+      params.set("page", "1");
+      router.replace(`${pathname}?${params.toString()}`);
+    }
+  }, [debouncedSearch, pathname, router, searchParams]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -54,18 +70,6 @@ export default function AdminUsersClient({
   }, [openActionMenu]);
 
   // Fungsi hendel pencarian
-  const handleSearch = (term: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", "1");
-
-    if (term) {
-      params.set("search", term);
-    } else {
-      params.delete("search");
-    }
-
-    router.replace(`${pathname}?${params.toString()}`);
-  };
 
   const handleConfirmSuspend = async () => {
     if (!userToSuspend) return;
@@ -146,9 +150,6 @@ export default function AdminUsersClient({
               Pantau semua akun pengantin yang terdaftar di sistem.
             </p>
           </div>
-          <button className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-zinc-200 text-zinc-700 rounded-xl hover:bg-zinc-50 transition-colors text-sm font-medium w-full sm:w-auto">
-            <Filter size={16} /> Filter Data
-          </button>
         </motion.div>
 
         <motion.div
@@ -163,10 +164,8 @@ export default function AdminUsersClient({
               />
               <input
                 type="text"
-                defaultValue={currentSearch}
-                onChange={(e) => {
-                  setTimeout(() => handleSearch(e.target.value), 400);
-                }}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                 placeholder="Cari nama atau email pengguna..."
                 className="w-full pl-10 pr-4 py-2.5 bg-white border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
               />
@@ -314,7 +313,7 @@ export default function AdminUsersClient({
                 disabled={currentPage <= 1}
                 onClick={() =>
                   router.push(
-                    `${pathname}?page=${currentPage - 1}${currentSearch ? `&search=${currentSearch}` : ""}`,
+                    `${pathname}?page=${currentPage - 1}${debouncedSearch ? `&search=${debouncedSearch}` : ""}`,
                   )
                 }
                 className="px-4 py-2 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-zinc-700 shadow-sm"
@@ -328,7 +327,7 @@ export default function AdminUsersClient({
                 disabled={currentPage >= totalPages}
                 onClick={() =>
                   router.push(
-                    `${pathname}?page=${currentPage + 1}${currentSearch ? `&search=${currentSearch}` : ""}`,
+                    `${pathname}?page=${currentPage + 1}${debouncedSearch ? `&search=${debouncedSearch}` : ""}`,
                   )
                 }
                 className="px-4 py-2 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-zinc-700 shadow-sm"
