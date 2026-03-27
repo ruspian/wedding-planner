@@ -1,7 +1,7 @@
 import { updateAdminPassword } from "@/actions/admin.action";
 import { RenderTabContentProps } from "@/types/admin.setting";
 import { motion } from "framer-motion";
-import { Save, ShieldCheck, ServerCrash, Loader2, Lock } from "lucide-react";
+import { Save, ShieldCheck, Loader2, Lock } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -13,7 +13,6 @@ const RenderTabContent = ({
   setFormData,
   handleSaveProfile,
 }: RenderTabContentProps) => {
-  const [isMaintenance, setIsMaintenance] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
     newPassword: "",
     confirmPassword: "",
@@ -96,60 +95,6 @@ const RenderTabContent = ({
               )}
               {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
             </button>
-          </div>
-        </motion.div>
-      );
-
-    case "system":
-      return (
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          className="space-y-6"
-        >
-          <h2 className="text-xl font-bold text-zinc-900">Preferensi Sistem</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-zinc-50 border border-zinc-200 rounded-2xl">
-              <div className="flex items-start gap-3">
-                <div
-                  className={`p-2 rounded-xl mt-1 ${isMaintenance ? "bg-rose-100 text-rose-600" : "bg-zinc-200 text-zinc-500"}`}
-                >
-                  <ServerCrash size={20} />
-                </div>
-                <div>
-                  <p className="font-semibold text-zinc-900">
-                    Maintenance Mode
-                  </p>
-                  <p className="text-sm text-zinc-500">
-                    Tutup akses aplikasi untuk semua pengguna kecuali Admin.
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsMaintenance(!isMaintenance)}
-                className={`relative w-14 h-8 rounded-full transition-colors duration-300 ease-in-out flex items-center px-1 ${isMaintenance ? "bg-rose-500" : "bg-zinc-300"}`}
-              >
-                <motion.div
-                  layout
-                  className="w-6 h-6 bg-white rounded-full shadow-sm"
-                  animate={{ x: isMaintenance ? 24 : 0 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                />
-              </button>
-            </div>
-            <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-2xl space-y-3">
-              <label className="font-semibold text-zinc-900 block">
-                Zona Waktu Sistem (Timezone)
-              </label>
-              <select className="w-full px-4 py-2.5 bg-white border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-zinc-700">
-                <option value="WITA">
-                  WITA - Asia/Makassar (Waktu Saat Ini)
-                </option>
-                <option value="WIB">WIB - Asia/Jakarta</option>
-                <option value="WIT">WIT - Asia/Jayapura</option>
-              </select>
-            </div>
           </div>
         </motion.div>
       );

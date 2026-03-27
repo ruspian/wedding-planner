@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, Variants, AnimatePresence } from "framer-motion";
-import { User, Lock, Globe } from "lucide-react";
+import { User, Lock } from "lucide-react";
 import { useState } from "react";
 import RenderTabContent from "./RenderTabContent";
 import { updateAdminProfile } from "@/actions/admin.action";
@@ -10,7 +10,6 @@ import { AdminData } from "@/types/admin.setting";
 const tabs = [
   { id: "profile", name: "Profil Admin", icon: User },
   { id: "security", name: "Keamanan", icon: Lock },
-  { id: "system", name: "Sistem & Web", icon: Globe },
 ];
 
 export default function AdminSettingsClient({

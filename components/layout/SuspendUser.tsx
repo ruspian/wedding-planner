@@ -31,7 +31,9 @@ const SuspendUser = ({
               <AlertTriangle size={32} />
             </div>
 
-            <h2 className="text-xl font-bold text-zinc-900">Suspend Akun?</h2>
+            <h2 className="text-xl font-bold text-zinc-900">
+              {userToSuspend.isSuspended ? "Suspend Akun?" : "Unsuspend Akun?"}
+            </h2>
             <p className="text-sm text-zinc-500 mt-2">
               Anda yakin ingin mensuspend akun <b>{userToSuspend.name}</b>?
               Pengguna ini tidak akan bisa login atau mengakses proyek
@@ -49,14 +51,14 @@ const SuspendUser = ({
               <button
                 disabled={isSuspending}
                 onClick={handleConfirmSuspend}
-                className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-rose-600 rounded-xl hover:bg-rose-700 transition-colors shadow-md shadow-rose-600/20 flex items-center justify-center gap-2"
+                className={`flex-1 px-4 py-2.5 text-sm font-medium text-white  transition-colors shadow-md shadow-rose-600/20 flex items-center justify-center gap-2 rounded-xl ${!userToSuspend.isSuspended ? "bg-emerald-600  hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"}`}
               >
                 {isSuspending ? (
                   <>
                     <Loader2 size={16} className="animate-spin" /> Proses...
                   </>
                 ) : (
-                  "Ya, Suspend"
+                  <p>{!userToSuspend.isSuspended ? "Unsuspend" : "Suspend"}</p>
                 )}
               </button>
             </div>

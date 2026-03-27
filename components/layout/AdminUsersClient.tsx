@@ -1,13 +1,7 @@
 "use client";
 
 import { motion, Variants } from "framer-motion";
-import {
-  Search,
-  MoreVertical,
-  ShieldBan,
-  Eye,
-  ShieldCheck,
-} from "lucide-react";
+import { Search, MoreVertical } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { AdminUsersClientProps, UserData } from "@/types/admin.user";
@@ -17,6 +11,8 @@ import SuspendUser from "./SuspendUser";
 import { toggleSuspendUser } from "@/actions/admin.action";
 import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
+import ActionUserMenu from "./ActionUserMenu";
+import Pagination from "./Pagination";
 
 export default function AdminUsersClient({
   usersData,
@@ -213,7 +209,7 @@ export default function AdminUsersClient({
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 + index * 0.05 }}
-                      className="hover:bg-zinc-50/50 transition-colors group relative"
+                      className={`hover:bg-zinc-50/50 transition-colors group relative`}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-xs font-mono text-zinc-500 bg-zinc-100 px-2.5 py-1 rounded-md">
@@ -221,7 +217,9 @@ export default function AdminUsersClient({
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-zinc-900">
+                        <div
+                          className={`font-medium text-zinc-900 ${!user.isSuspended ? "line-through" : ""}`}
+                        >
                           {user.name || "User Baru"}
                         </div>
                         <div className="text-xs text-zinc-500 mt-0.5">
@@ -260,40 +258,12 @@ export default function AdminUsersClient({
                         </button>
 
                         {openActionMenu === user.id && (
-                          <div className="absolute right-10 top-1/2 -translate-y-1/2 w-40 bg-white border border-zinc-200 shadow-xl rounded-xl z-10 py-1 overflow-hidden">
-                            <button
-                              onClick={() => {
-                                setSelectedUser(user);
-                                setOpenActionMenu(null);
-                              }}
-                              className="w-full text-left px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 flex items-center gap-2 cursor-pointer"
-                            >
-                              <Eye size={14} className="text-zinc-400" /> Lihat
-                              Detail
-                            </button>
-                            <div className="h-px w-full bg-zinc-100 my-1"></div>
-                            {user?.isSuspended ? (
-                              <button
-                                onClick={() => {
-                                  setUserToSuspend(user);
-                                  setOpenActionMenu(null);
-                                }}
-                                className="w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-2 font-medium cursor-pointer"
-                              >
-                                <ShieldBan size={14} /> Suspend
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => {
-                                  setUserToSuspend(user);
-                                  setOpenActionMenu(null);
-                                }}
-                                className="w-full text-left px-4 py-2 text-sm text-emerald-600 hover:bg-emerald-50 flex items-center gap-2 font-medium cursor-pointer"
-                              >
-                                <ShieldCheck size={14} /> Unsuspend
-                              </button>
-                            )}
-                          </div>
+                          <ActionUserMenu
+                            user={user}
+                            setUserToSuspend={setUserToSuspend}
+                            setSelectedUser={setSelectedUser}
+                            setOpenActionMenu={setOpenActionMenu}
+                          />
                         )}
                       </td>
                     </motion.tr>
@@ -303,39 +273,12 @@ export default function AdminUsersClient({
             </table>
           </div>
 
-          <div className="p-4 border-t border-zinc-100 bg-zinc-50/50 flex flex-col sm:flex-row items-center justify-between text-sm text-zinc-500 gap-4">
-            <span>
-              Total <b className="text-zinc-700">{totalUsers}</b> pengguna
-            </span>
-
-            <div className="flex gap-2 items-center">
-              <button
-                disabled={currentPage <= 1}
-                onClick={() =>
-                  router.push(
-                    `${pathname}?page=${currentPage - 1}${debouncedSearch ? `&search=${debouncedSearch}` : ""}`,
-                  )
-                }
-                className="px-4 py-2 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-zinc-700 shadow-sm"
-              >
-                Sebelumnya
-              </button>
-              <span className="px-4 py-2 font-medium text-zinc-700 bg-zinc-100/50 rounded-xl">
-                Hal {currentPage} dari {totalPages || 1}
-              </span>
-              <button
-                disabled={currentPage >= totalPages}
-                onClick={() =>
-                  router.push(
-                    `${pathname}?page=${currentPage + 1}${debouncedSearch ? `&search=${debouncedSearch}` : ""}`,
-                  )
-                }
-                className="px-4 py-2 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-zinc-700 shadow-sm"
-              >
-                Selanjutnya
-              </button>
-            </div>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            search={search}
+            totalUsers={totalUsers}
+          />
         </motion.div>
       </motion.div>
 

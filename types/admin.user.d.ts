@@ -28,3 +28,10 @@ export interface SuspendUserProps {
   isSuspending: boolean;
   modalVariants: Variants;
 }
+
+export interface ActionMenuProps {
+  user: UserData | null;
+  setUserToSuspend: (user: UserData | null) => void;
+  setOpenActionMenu: (menu: string | null) => void;
+  setSelectedUser: (user: UserData | null) => void;
+}
