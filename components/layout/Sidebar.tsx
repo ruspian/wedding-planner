@@ -13,10 +13,12 @@ import {
   Menu,
   X,
   CalendarCheck,
+  HeartHandshake,
 } from "lucide-react";
 
 const navItems = [
   { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+  { name: "Wedding", path: "/weddings", icon: HeartHandshake },
   { name: "Tamu", path: "/guests", icon: Users },
   { name: "Budget", path: "/budget", icon: Wallet },
   { name: "Vendor", path: "/vendors", icon: Store },

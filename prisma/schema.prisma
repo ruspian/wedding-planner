@@ -100,10 +100,10 @@ model Wedding {
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  brideName   String    // Nama Mempelai Wanita
-  groomName   String    // Nama Mempelai Pria
-  weddingDate DateTime? // Tanggal Pernikahan
-  totalBudget Decimal?  @default(0) // Total Anggaran
+  brideName   String    
+  groomName   String   
+  weddingDate DateTime? 
+  totalBudget Int?  @default(0) 
   
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -120,9 +120,9 @@ model Task {
   weddingId   String
   wedding     Wedding   @relation(fields: [weddingId], references: [id], onDelete: Cascade)
   
-  title       String    // misal: "Booking Gedung"
+  title       String    
   description String?   
-  dueDate     DateTime? // Tenggat waktu
+  dueDate     DateTime? 
   isCompleted Boolean   @default(false)
   
   createdAt   DateTime  @default(now())
