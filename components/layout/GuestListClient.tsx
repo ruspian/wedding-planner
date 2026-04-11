@@ -5,18 +5,16 @@ import {
   Search,
   Plus,
   Users,
-  CheckCircle2,
-  Clock,
-  XCircle,
   MoreVertical,
   X,
   Loader2,
   Save,
+  BookOpen,
 } from "lucide-react";
 import { useState } from "react";
 import { addGuest } from "@/actions/guest.action";
-import { toast } from "sonner";
 import { GuestData, GuestStats } from "@/types/guest";
+import { toast } from "sonner";
 
 export default function GuestListClient({
   guests,
@@ -25,21 +23,18 @@ export default function GuestListClient({
 }: {
   guests: GuestData[];
   stats: GuestStats;
-  weddingId?: string | null;
+  weddingId: string;
 }) {
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // State form tambah tamu
   const [formData, setFormData] = useState({
     name: "",
     contact: "",
     pax: 1,
-    rsvpStatus: "PENDING",
   });
 
-  // Filter tamu dari search bar (Client-side search biar ngebut)
   const filteredGuests = guests.filter(
     (g) =>
       g.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -51,42 +46,19 @@ export default function GuestListClient({
     setIsSaving(true);
 
     try {
-      const result = await addGuest(weddingId as string, formData);
+      const result = await addGuest(weddingId, formData);
       if (!result.success) throw new Error(result.message);
 
-      setIsModalOpen(false);
-      setFormData({ name: "", contact: "", pax: 1, rsvpStatus: "PENDING" });
-
       toast.success(result.message);
+
+      setIsModalOpen(false);
+      setFormData({ name: "", contact: "", pax: 1 });
     } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      }
+      toast.error(
+        error instanceof Error ? error.message : "Gagal menyimpan data!",
+      );
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const getRsvpBadge = (status: string) => {
-    switch (status) {
-      case "ATTENDING":
-        return (
-          <span className="flex w-fit items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-600 text-xs font-semibold rounded-md border border-emerald-100">
-            <CheckCircle2 size={12} /> Hadir
-          </span>
-        );
-      case "DECLINED":
-        return (
-          <span className="flex w-fit items-center gap-1.5 px-2.5 py-1 bg-rose-50 text-rose-600 text-xs font-semibold rounded-md border border-rose-100">
-            <XCircle size={12} /> Tidak Hadir
-          </span>
-        );
-      default:
-        return (
-          <span className="flex w-fit items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-600 text-xs font-semibold rounded-md border border-amber-100">
-            <Clock size={12} /> Menunggu
-          </span>
-        );
     }
   };
 
@@ -112,17 +84,17 @@ export default function GuestListClient({
         animate="show"
         className="space-y-6"
       >
-        {/* HEADER */}
         <motion.div
           variants={itemVariants}
           className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm"
         >
           <div>
             <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">
-              Daftar Tamu Undangan
+              Estimasi Tamu & Katering
             </h1>
             <p className="text-zinc-500 text-sm mt-1">
-              Kelola undangan dan pantau konfirmasi kehadiran (RSVP).
+              Catat daftar undangan untuk mengestimasi kebutuhan porsi katering
+              Anda.
             </p>
           </div>
           <button
@@ -133,47 +105,39 @@ export default function GuestListClient({
           </button>
         </motion.div>
 
-        {/* STATS CARDS */}
         <motion.div
           variants={itemVariants}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
         >
-          <div className="bg-white border border-zinc-200 p-5 rounded-3xl">
-            <p className="text-sm font-medium text-zinc-500">
-              Total Tamu Diundang
-            </p>
-            <p className="text-2xl font-black text-zinc-900 mt-1">
-              {stats.totalGuests}
-            </p>
-          </div>
-          <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-3xl">
-            <p className="text-sm font-medium text-emerald-700">
-              Tamu Konfirmasi Hadir
-            </p>
-            <p className="text-2xl font-black text-emerald-600 mt-1">
-              {stats.attendingCount}
-            </p>
-          </div>
-          <div className="bg-emerald-600 border border-emerald-700 p-5 rounded-3xl text-white shadow-md shadow-emerald-600/20">
-            <p className="text-sm font-medium text-emerald-50">
-              Total Porsi Dibutuhkan (Pax)
-            </p>
-            <div className="flex items-center gap-2 mt-1">
-              <Users size={24} className="text-emerald-200" />
-              <p className="text-2xl font-black">{stats.totalPaxAttending}</p>
+          <div className="bg-white border border-zinc-200 p-6 rounded-3xl flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-zinc-500">
+                Total Tamu Diundang
+              </p>
+              <p className="text-3xl font-black text-zinc-900 mt-1">
+                {stats.totalGuests}
+              </p>
+            </div>
+            <div className="p-4 bg-zinc-50 rounded-2xl text-zinc-400">
+              <BookOpen size={28} />
             </div>
           </div>
-          <div className="bg-amber-50 border border-amber-100 p-5 rounded-3xl">
-            <p className="text-sm font-medium text-amber-700">
-              Belum Konfirmasi
-            </p>
-            <p className="text-2xl font-black text-amber-600 mt-1">
-              {stats.pendingCount}
-            </p>
+
+          <div className="bg-emerald-600 border border-emerald-700 p-6 rounded-3xl text-white shadow-md shadow-emerald-600/20 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-emerald-50">
+                Estimasi Kebutuhan Porsi (Pax)
+              </p>
+              <p className="text-3xl font-black mt-1">
+                {stats.totalEstimatedPax}
+              </p>
+            </div>
+            <div className="p-4 bg-emerald-500 rounded-2xl text-emerald-50">
+              <Users size={28} />
+            </div>
           </div>
         </motion.div>
 
-        {/* TABEL AREA */}
         <motion.div
           variants={itemVariants}
           className="bg-white rounded-3xl border border-zinc-200 shadow-sm overflow-hidden"
@@ -198,12 +162,13 @@ export default function GuestListClient({
             <table className="w-full min-w-max text-left border-collapse">
               <thead>
                 <tr className="bg-zinc-50/80 text-zinc-500 text-xs uppercase tracking-wider border-b border-zinc-200">
-                  <th className="px-6 py-4 font-semibold">Nama Tamu</th>
-                  <th className="px-6 py-4 font-semibold">Kontak</th>
-                  <th className="px-6 py-4 font-semibold text-center">
-                    Jatah Pax
+                  <th className="px-6 py-4 font-semibold">Nama Undangan</th>
+                  <th className="px-6 py-4 font-semibold">
+                    Kontak / Keterangan
                   </th>
-                  <th className="px-6 py-4 font-semibold">Status RSVP</th>
+                  <th className="px-6 py-4 font-semibold text-center">
+                    Estimasi Pax
+                  </th>
                   <th className="px-6 py-4 text-center font-semibold">Aksi</th>
                 </tr>
               </thead>
@@ -211,10 +176,10 @@ export default function GuestListClient({
                 {filteredGuests.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={4}
                       className="px-6 py-10 text-center text-zinc-500"
                     >
-                      Tidak ada tamu ditemukan.
+                      Belum ada tamu yang dicatat.
                     </td>
                   </tr>
                 ) : (
@@ -232,11 +197,8 @@ export default function GuestListClient({
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-600">
                         {guest.contact || "-"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center font-bold text-zinc-700">
-                        {guest.pax}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getRsvpBadge(guest.rsvpStatus)}
+                      <td className="px-6 py-4 whitespace-nowrap text-center font-bold text-zinc-700 bg-zinc-50/50">
+                        {guest.pax} Porsi
                       </td>
                       <td className="px-6 py-4 text-center whitespace-nowrap">
                         <button className="p-2 text-zinc-400 hover:text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors">
@@ -252,7 +214,6 @@ export default function GuestListClient({
         </motion.div>
       </motion.div>
 
-      {/* MODAL TAMBAH TAMU */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -271,7 +232,7 @@ export default function GuestListClient({
             >
               <div className="flex items-center justify-between p-6 border-b border-zinc-100 bg-zinc-50/50">
                 <h2 className="text-xl font-bold text-zinc-900">
-                  Tambah Tamu Baru
+                  Tambah Estimasi Tamu
                 </h2>
                 <button
                   onClick={() => setIsModalOpen(false)}
@@ -285,7 +246,7 @@ export default function GuestListClient({
                 <div className="p-6 space-y-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-zinc-700">
-                      Nama Lengkap
+                      Nama
                     </label>
                     <input
                       required
@@ -294,13 +255,13 @@ export default function GuestListClient({
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      placeholder="Contoh: Budi Santoso"
+                      placeholder="Contoh: Otong, Teman Sekantor, dll."
                       className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-zinc-700">
-                      Kontak (No HP / Email)
+                      Kontak / Info Tambahan
                     </label>
                     <input
                       type="text"
@@ -308,48 +269,31 @@ export default function GuestListClient({
                       onChange={(e) =>
                         setFormData({ ...formData, contact: e.target.value })
                       }
-                      placeholder="08123456789"
+                      placeholder="0812xxx atau Teman Kampus"
                       className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-zinc-700">
-                        Jatah Orang (Pax)
-                      </label>
-                      <input
-                        required
-                        type="number"
-                        min="1"
-                        value={formData.pax}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            pax: parseInt(e.target.value),
-                          })
-                        }
-                        className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-zinc-700">
-                        Status RSVP
-                      </label>
-                      <select
-                        value={formData.rsvpStatus}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            rsvpStatus: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-zinc-700"
-                      >
-                        <option value="PENDING">Menunggu</option>
-                        <option value="ATTENDING">Hadir</option>
-                        <option value="DECLINED">Tidak Hadir</option>
-                      </select>
-                    </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-700">
+                      Estimasi Orang (Pax)
+                    </label>
+                    <input
+                      required
+                      type="number"
+                      min="1"
+                      value={formData.pax}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          pax: parseInt(e.target.value),
+                        })
+                      }
+                      className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all font-semibold text-lg"
+                    />
+                    <p className="text-xs text-zinc-400 mt-1">
+                      Masukkan perkiraan jumlah orang yang akan hadir dari
+                      undangan ini.
+                    </p>
                   </div>
                 </div>
                 <div className="p-4 border-t border-zinc-100 bg-zinc-50/50 flex justify-end gap-3">
@@ -370,7 +314,7 @@ export default function GuestListClient({
                     ) : (
                       <Save size={16} />
                     )}{" "}
-                    Simpan Tamu
+                    Simpan Data
                   </button>
                 </div>
               </form>

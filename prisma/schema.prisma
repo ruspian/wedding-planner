@@ -147,7 +147,6 @@ model Guest {
   
   name        String
   contact     String?   // No HP atau Email tamu
-  rsvpStatus  String    @default("PENDING") // PENDING, ATTENDING, DECLINED
   pax         Int       @default(1) // Jumlah orang yang dibawa
 }
 

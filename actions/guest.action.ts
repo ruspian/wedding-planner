@@ -3,11 +3,9 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { GuestData } from "@/types/guest";
 
-export async function addGuest(
-  weddingId: string,
-  data: { name: string; contact: string; pax: number; rsvpStatus: string },
-) {
+export async function addGuest(weddingId: string, data: GuestData) {
   try {
     const session = await auth();
     if (!session || !session.user) {
@@ -23,7 +21,6 @@ export async function addGuest(
         name: data.name,
         contact: data.contact,
         pax: data.pax,
-        rsvpStatus: data.rsvpStatus,
       },
     });
 
